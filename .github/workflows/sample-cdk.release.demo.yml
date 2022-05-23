@@ -1,0 +1,45 @@
+name: Release Sample CDK Application
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: us-west-2
+
+jobs:
+  changeset:
+    name: Changeset
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./sample-cdk/demo
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+      - name: Install CDK
+        run: npm install -g aws-cdk@2.23.0
+      - name: Get Changeset
+        run: ./changeset.sh
+  deploy:
+    name: Deploy
+    environment: "demo"
+    needs: [changeset]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./sample-cdk/demo
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+      - name: Install CDK
+        run: npm install -g aws-cdk@2.23.0
+      - name: Deploy the CDK
+        run: ./deploy.sh
